@@ -4,25 +4,28 @@ from lxml import html
 from xblock.core import XBlock
 from xblock.fields import Boolean, Scope
 from xblock.fragment import Fragment
+from xblockutils.resources import ResourceLoader
+from xblockutils.studio_editable import StudioEditableXBlockMixin
+from xblockutils.studio_editable import StudioContainerXBlockMixin
+loader = ResourceLoader(__name__)
 
-
-class BrowserlockproctorXBlock(XBlock):
+class BrowserlockproctorXBlock(StudioContainerXBlockMixin,XBlock):
     has_proctoring = Boolean(default=False, scope=Scope.user_state_summary, help="Whether the proctoring is enabled")
 
     
     def student_view(self, context=None):
         html_str =pkg_resources.resource_string(__name__, "static/html/browserlockproctor.html").decode('utf-8')
         frag = Fragment(str(html_str).format(block=self))
-
+        parent=XBlock.get_parent(self)
         css_str=pkg_resources.resource_string(__name__, "static/css/browserlockproctor.css").decode('utf-8')
         frag.add_css(str(css_str)) 
         child_frags = self.runtime.render_children(
-        block=self, view_name='student_view')
-        html = self._render_template(
-            'static/html/sequence.html', children=child_frags)
+        block=parent, view_name='student_view')
+        children=child_frags
+        html = loader.render_template(
+            'static/html/sequence.html', children)
         frag.add_content(html)
         frag.add_frags_resources(child_frags)
-
         js_str=pkg_resources.resource_string(__name__, "static/js/src/browserlockproctor.js").decode('utf-8')
         frag.add_javascript(str(js_str))
         frag.initialize_js('BrowserlockproctorXBlock')
