@@ -19,8 +19,8 @@ class BrowserlockproctorXBlock(StudioContainerXBlockMixin,XBlock):
         parent=XBlock.get_parent(self)
         css_str=pkg_resources.resource_string(__name__, "static/css/browserlockproctor.css").decode('utf-8')
         frag.add_css(str(css_str)) 
-        child_frags = self.runtime.render_children(
-        block=parent, view_name='student_view')
+        child_frags = self.runtime.render_child(
+        parent)
         children=child_frags
         html = loader.render_template(
             'static/html/sequence.html', children)
